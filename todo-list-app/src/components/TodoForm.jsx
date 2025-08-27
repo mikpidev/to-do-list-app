@@ -13,6 +13,7 @@ export default function TodoForm({ onAddTask }) {
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", gap: "0.5rem" }}>
       <input
+        type="text"
         placeholder="Nueva tarea"
         value={task}
         onChange={(e) => setTask(e.target.value)}

@@ -1,51 +1,64 @@
 import { useState } from "react";
 
-import TodoList from "./TodoList";
+export default function TodoList({ tasks, onDelete, onUpdate }) {
+  const [editId, setEditId] = useState(null);
+  const [editText, setEditText] = useState("");
 
-function App() {
-  const [tasks, setTasks] = useState([]);
-
-  const addTask = (text) => {
-    setTasks([
-      ...tasks,
-      { id: Date.now(), text, completed: false }
-    ]);
+  const handleEdit = (task) => {
+    setEditId(task.id);
+    setEditText(task.text);
   };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    onUpdate(editId, editText);
+    setEditId(null);
+    setEditText("");
   };
 
-  const updateTask = (id, newText) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, text: newText } : task
-      )
-    );
-  };
+  if (!tasks || tasks.length === 0) return <p>No hay tareas</p>;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "2rem",
-        fontFamily: "Arial, sans-serif",
-        backgroundColor: "#f9f9f9",
-        color: "#333"
-      }}
-    >
-      <h1>📝 Todo List</h1>
-
-      {/* Pasamos la función para agregar tareas */}
-      <TodoForm onAddTask={addTask} />
-
-      {/* Aquí sí se pasa el array de tasks */}
-      <TodoList tasks={tasks} onDelete={deleteTask} onUpdate={updateTask} />
-    </div>
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {tasks.map((task) => (
+        <li
+          key={task.id}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "300px",
+            padding: "0.5rem",
+            marginBottom: "0.5rem",
+            backgroundColor: "#fff",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+          }}
+        >
+          {editId === task.id ? (
+            <form
+              onSubmit={handleUpdate}
+              style={{ display: "flex", gap: "0.5rem", flex: 1 }}
+            >
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button type="submit">Guardar</button>
+            </form>
+          ) : (
+            <>
+              <span>{task.text}</span>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button onClick={() => handleEdit(task)}>Editar</button>
+                <button onClick={() => onDelete(task.id)}>Eliminar</button>
+              </div>
+            </>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
-
-export default App;
