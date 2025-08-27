@@ -1,25 +1,25 @@
-import { useState } from "react";
-import TodoForm from "./components/TodoForm"; // Ajusta la ruta si está en "components/TodoForm"
-import TodoList from "./components/TodoList"; // Ajusta la ruta si está en "components/TodoList"
+import { useEffect, useState } from "react";
+import TodoForm from "./components/TodoForm";
+import TodoList from "./components/TodoList";
+import { db } from "./firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 function App() {
   const [tasks, setTasks] = useState([]);
 
-  const addTask = (text) => {
-    setTasks([...tasks, { id: Date.now(), text, completed: false }]);
-  };
+  // Cargar tareas al iniciar
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const snapshot = await getDocs(collection(db, "tasks"));
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTasks(data);
+    };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
-
-  const updateTask = (id, newText) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, text: newText } : task
-      )
-    );
-  };
+    fetchTasks();
+  }, []);
 
   return (
     <div
@@ -35,14 +35,8 @@ function App() {
       }}
     >
       <h1>📝 Todo List</h1>
-
-      <TodoForm onAddTask={addTask} />
-
-      <TodoList
-        tasks={tasks}
-        onDelete={deleteTask}
-        onUpdate={updateTask}
-      />
+      <TodoForm onTaskAdded={setTasks} />
+      <TodoList tasks={tasks} />
     </div>
   );
 }
